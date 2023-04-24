@@ -1,1 +1,1 @@
-# indian-mobile-operator-analysis
+# This application provides insights for Indian mobile networks.
