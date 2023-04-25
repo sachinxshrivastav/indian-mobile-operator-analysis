@@ -16,7 +16,7 @@ st.title('Indian Mobile Operators Analysis')
 st.text('This is a web app to gain insights of Indian Mobile Operators')
 
 # Reading the Dataset 404
-df_data_404 = pd.read_csv('data/404.csv')
+#df_data_404 = pd.read_csv('data/404.csv')
 
 # Reading the Dataset 405
 df_data_405 = pd.read_csv('data/405.csv')
@@ -25,11 +25,11 @@ df_data_405 = pd.read_csv('data/405.csv')
 df_data_mcc_mnc = pd.read_csv('data/MCC-MNC India.csv')
 
 # Merging the two Datasets
-df = pd.concat([df_data_404, df_data_405])
+#df = pd.concat([df_data_404, df_data_405])
+df = df_data_405
 
 st.header('Getting a glimpse of the dataset')
-st.header('Columns')
-st.markdown(
+st.text(
 """
 Radio: The generation of broadband cellular network technology (Eg. LTE, GSM)
 
@@ -57,7 +57,9 @@ Created: When a particular cell was first added to database (UNIX timestamp)
 
 Updated: When a particular cell was last seen (UNIX timestamp)
 
-AverageSignal: To get the positions of cells, OpenCelliD processes measurements from data contributors. Each measurement includes GPS location of device + Scanned cell identifier (MCC-MNC-LAC-CID) + Other device properties (Signal strength). In this process, signal strength of the device is averaged. Most ‘averageSignal’ values are 0 because OpenCelliD simply didn’t receive signal strength values.    
+AverageSignal: To get the positions of cells, OpenCelliD processes measurements from data contributors. 
+Each measurement includes GPS location of device + Scanned cell identifier (MCC-MNC-LAC-CID) + Other device properties (Signal strength). 
+In this process, signal strength of the device is averaged. Most ‘averageSignal’ values are 0 because OpenCelliD simply didn’t receive signal strength values.    
 """)
 
 
@@ -165,6 +167,7 @@ df_corrected = pd.concat([df_Karnataka, df_Andhra_Pradesh_Telangana, df_TamilNad
 
 # Visualizations
 
+
 # Returns Dataframe with Column Name and Respective Count
 def value_counts_df(df, col):
     df_new = df.copy()
@@ -175,10 +178,12 @@ def value_counts_df(df, col):
 # Finding Tower Count by Operator
 df_towercount_byoperator = value_counts_df(df_corrected, 'operator')
 
+
+st.header('Tower Counts and Ratio for Each Operator')
 # Pie Chart
 df = df_towercount_byoperator
 fig_towercount_byoperator = px.pie(df, values='count', names='operator',
-             title='Tower Count by Operator', width=1000)
+             title='Tower Count by Operator', width=1200)
 fig_towercount_byoperator.update_traces(textinfo='percent+label')
 st.plotly_chart(fig_towercount_byoperator)
 
@@ -187,21 +192,25 @@ st.plotly_chart(fig_towercount_byoperator)
 df_towercount_circle = value_counts_df(df_corrected, 'circle')
 #   df_towercount_circle
 
+
+st.header('Tower Count and Ratio for Each Circle')
 # Pie Chart
 df = df_towercount_circle
-fig_towercount_circle = px.pie(df, values='count', names='circle', title='Tower Count by Circle', width=1000)
+fig_towercount_circle = px.pie(df, values='count', names='circle', title='Tower Count by Circle', width=1200)
 fig_towercount_circle.update_traces(textinfo='percent+label',)
 st.plotly_chart(fig_towercount_circle)
 
 
+st.header('Tower Types (2G/3G/4G) count for all Circles')
 # Tower Types Count of All Operators by Circles
 df_radio_count = df_corrected.groupby(["operator","circle","radio"], as_index=False)["cid"].count()
+
 
 # Getting the operator List
 df_operators = df_radio_count['operator'].unique()
 selected_operator = st.selectbox('Select operator',df_operators)
 df_tower_count_all_op = df_radio_count[df_radio_count.operator == selected_operator ]
-fig_tower_count_all_op = px.bar( df_tower_count_all_op , x="circle", y="cid", color="radio", title=f'Count of Radio Types in all the circles for {selected_operator}', text="radio")
+fig_tower_count_all_op = px.bar( df_tower_count_all_op , x="circle", y="cid", color="radio", title=f'Count of Radio Types in all the circles for {selected_operator}', text="radio", width=1200)
 st.plotly_chart(fig_tower_count_all_op)
 
 
@@ -219,6 +228,7 @@ config = {
     }
 }
 
+st.header('Geo Location of the Towers')
 map = KeplerGl(height=800, config=config ,data={
 "Karnataka": df_Karnataka , 
 "Andhra Pradesh Telangana":df_Andhra_Pradesh_Telangana,
