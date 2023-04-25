@@ -15,8 +15,8 @@ def display_title():
     st.set_page_config(layout="wide")
     st.title('Indian Mobile Operators Analysis')
     st.text('This is a web app to gain insights of Indian Mobile Operators')
-    st.text('''The dataset used in the application is a subset of the main dataset, to optimize the application performance.
-    The data has been collected sourced from Sourced from : https://opencellid.org/ 
+    st.text('''The dataset used in the application is a subset of the main dataset with less records, to optimize the application performance.
+The data has been collected sourced from Sourced from : https://opencellid.org/ 
     ''')
 
 @st.cache_data
@@ -80,8 +80,8 @@ def display_dataset_preview(df):
 
 
 # Data Processing
-# Replacing by Radio by Generation for better understanding
 def data_cleaning(df,df_data_mcc_mnc):
+    # Replacing by Radio by Generation for better understanding
     df['radio'] = df['radio'].replace('UMTS', '3G').replace('GSM', '2G').replace('LTE', '4G').replace('CDMA', '3G').replace('NR','5G')
 
     # As the operator and cicle names are present in a different file, we will make a left join to get all values
@@ -192,9 +192,9 @@ def data_cleaning(df,df_data_mcc_mnc):
     "Bihar & Jharkhand":df_Bihar_Jharkhand,
     "Haryana":df_Haryana,
     "Orissa":df_Orissa,
-    "HimachalPradesh":df_HimachalPradesh,
-    "Assam_NorthEast":df_Assam_NorthEast,
-    "Jammu_Kashmir":df_Jammu_Kashmir
+    "Himachal Pradesh":df_HimachalPradesh,
+    "Assam & NorthEast":df_Assam_NorthEast,
+    "Jammu Kashmir":df_Jammu_Kashmir
     }
 
     return df_corrected,circle_dict
@@ -202,7 +202,7 @@ def data_cleaning(df,df_data_mcc_mnc):
 
 # Visualizations
 # Returns Dataframe with Column Name and Respective Count
-def draw_charts(df_corrected):
+def draw_charts(df_corrected,circle_dict):
 
     def value_counts_df(df, col):
         df_new = df.copy()
@@ -249,6 +249,19 @@ def draw_charts(df_corrected):
     st.plotly_chart(fig_tower_count_all_op)
 
 
+    st.header('Tower types and Count by each Circle')
+    df_circles = circle_dict.keys()
+    #st.text(df_circles)
+    
+    selected_circle = st.selectbox('Select Circle',df_circles)
+
+    #for key,value in circle_dict.items():
+    df_circle_selected = circle_dict[selected_circle]
+    df_circle_selected = df_circle_selected.groupby(["operator","circle","radio"], as_index=False)["cid"].count()
+    fig_towertypes_bycircle = px.bar( df_circle_selected , x="operator", y="cid", color="radio", title=f'Tower types and Count : {selected_circle}', text="radio",width=1200)
+    st.plotly_chart(fig_towertypes_bycircle)
+
+
 
 
 @st.cache_data
@@ -285,7 +298,7 @@ def main():
     # Data Cleaning
     df_corrected,circle_dict = data_cleaning(df,df_data_mcc_mnc)
 
-    draw_charts(df_corrected)
+    draw_charts(df_corrected,circle_dict)
 
     draw_kepler_map(circle_dict)
 
